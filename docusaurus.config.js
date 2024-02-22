@@ -74,7 +74,7 @@ const config = {
             label: "Starter Kit",
           },
           {
-            to: "/docs/morpheme_library/introduction",
+            to: "/docs/morpheme_library/morpheme_base",
             activeBasePath: "docs/morpheme_library",
             position: "right",
             label: "Library",
@@ -106,7 +106,7 @@ const config = {
               },
               {
                 label: "Morpheme Library",
-                to: "/docs/morpheme_library/introduction",
+                to: "/docs/morpheme_library/morpheme_base",
               },
             ],
           },

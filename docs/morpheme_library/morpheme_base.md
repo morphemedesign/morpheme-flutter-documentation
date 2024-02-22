@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Morpheme Base
 
 Link: [pub.dev](https://pub.dev/packages/morpheme_base)
