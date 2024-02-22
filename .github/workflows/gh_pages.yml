@@ -23,8 +23,8 @@ jobs:
         run: |
           cd build
           git init
-          git config user.name "Dena Meidina"
-          git config user.email "dena05meidina@gmail.id"
+          git config user.name "dena"
+          git config user.email "dena@gits.id"
           git remote add secure-origin https://username:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git checkout -b gh-pages
           git add .
