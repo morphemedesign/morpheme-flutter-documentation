@@ -15,5 +15,5 @@ For android you can build 2 way:
 
 For iOS you can build 2 way:
 
-1. Build archive you can read more to build archive in [MorphemeCLI Build Archive](../morpheme_cli/build/ios/app_bundle)
+1. Build archive you can read more to build archive in [MorphemeCLI Build Archive](../morpheme_cli/build/ios/ios)
 2. Build IPA you can read more to build ipa in [MorphemeCLI Prebuild ios](../morpheme_cli/build/prebuild/ios) and after prebuild then [MorphemeCLI Build IPA](../morpheme_cli/build/ios/ipa)

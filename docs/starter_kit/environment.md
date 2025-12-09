@@ -149,7 +149,6 @@ For more information on the use of `project_name`, see the following list:
 - CLI [morpheme config](../morpheme_cli/generate/config)
 - CLI [morpheme endpoint](../morpheme_cli/generate/endpoint)
 - CLI [morpheme api](../morpheme_cli/generate/api)
-- CLI [morpheme unit-test](../morpheme_cli/generate/unit-test)
 
 ## Flavor
 
