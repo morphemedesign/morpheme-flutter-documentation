@@ -4,15 +4,15 @@ sidebar_position: 1
 
 # Getting Started
 
-## Requirement
+## Requirements
 
-- Dart SDK 3.2 - latest
-- Flutter: 3.16.0 - latest
+- Dart SDK: >= 3.6.0
+- Flutter SDK: >= 3.35.0
 
 :::note
 
-- Dart SDK Installation **[Dart SDK](https://dart.dev/get-dart)**
-- Flutter SDK Installation **[Flutter SDK](https://docs.flutter.dev/development/tools/sdk/releases?tab=macos)**
+- **[Dart SDK Installation](https://dart.dev/get-dart)**
+- **[Flutter SDK Installation](https://docs.flutter.dev/get-started/install)**
 
 :::
 
@@ -20,65 +20,72 @@ sidebar_position: 1
 
 - [VSCode](https://code.visualstudio.com/)
 
-## Installations
+## Installation
 
-Install current version `morpheme_cli` by this command :
+Install the latest version of `morpheme_cli` using the following command:
 
 ```bash
 dart pub global activate morpheme_cli
 ```
 
-   Make sure morpheme cli was installed, you can check by this command :
-
-```bash
-morpheme -v
-```
-
-```console title="Output"
-Morpheme CLI 1.0.0
-```
-
-If this directory is missing from your PATH, locate the file for your platform and add it.
-
-| Platform       | Cache location               |
-|----------------|------------------------------|
-| macOS or Linux | HOME/.pub-cache/bin          |
-| Windows*       | %LOCALAPPDATA%\Pub\Cache\bin |
-
 :::info
 
-If you want install spesific version morpheme cli you need to follow this step:
+If you need to install a specific version of `morpheme_cli`, use:
 
 ```bash
-dart pub global activate morpheme_cli@1.0.0
+dart pub global activate morpheme_cli@<version>
 ```
 
 :::
 
-### Additional Tools Installations
+### Verify Installation
 
-1. Install `flutterfire` for requirement command `morpheme firebase`.
+After installation, verify that `morpheme_cli` is correctly installed and check the status of all dependencies by running:
 
-   You can install with `dart pub global activate flutterfire_cli`
+```bash
+morpheme doctor
+```
 
-2. Install `gherkin` for requirement command `morpheme cucumber`.
+This command will check for all required and optional tools. If any tools are missing, it will provide instructions on how to install them.
 
-   Install gherkin executable and make sure to export to your PATH from this [Gherkin Executable](https://github.com/morphemedesign/morpheme-flutter-cli/releases/tag/cucumber)
+If the `morpheme` command is not found, ensure your PATH is configured correctly.
 
-3. Install `npm` for requirement command `morpheme cucumber` to generate report integration test.
+| Platform       | Cache Location               |
+|----------------|------------------------------|
+| macOS or Linux | `$HOME/.pub-cache/bin`       |
+| Windows        | `%LOCALAPPDATA%\Pub\Cache\bin` |
 
-   You can follow installation in [nodejs](https://nodejs.org/en)
+### Additional Tools
 
-4. Install `lcov` for requirement command `morpheme coverage`.
+The `morpheme doctor` command checks for these additional tools, which enable extended functionality:
 
-   Install lcov with follow [this installation](https://github.com/linux-test-project/lcov)
+1. **FlutterFire CLI** (`flutterfire`)
+   - Required for: `morpheme firebase`
+   - Install: `dart pub global activate flutterfire_cli`
+
+2. **Gherkin** (`gherkin`)
+   - Required for: `morpheme cucumber`
+   - Install: download from **[Gherkin Executable](https://github.com/morphemedesign/morpheme-flutter-cli/releases/tag/cucumber)** and add to PATH.
+
+3. **Node.js & npm** (`npm`)
+   - Required for: Generating integration test reports with `morpheme cucumber`.
+   - Install: **[Node.js](https://nodejs.org/en)**
+
+4. **LCOV** (`lcov`)
+   - Required for: `morpheme coverage`
+   - Install: **[LCOV Installation Guide](https://github.com/linux-test-project/lcov)**
+
+5. **Shorebird** (`shorebird`)
+   - Required for: `morpheme shorebird` (Code Push)
+   - Install: **[Shorebird Documentation](https://docs.shorebird.dev/)**
 
 ## Usage
 
-To use the Morpheme CLI, you must run the `morpheme` command from the terminal on your project directory.
+To use the Morpheme CLI, run the `morpheme` command from your terminal within your project directory.
 
 :::caution
 
-This CLI can only be used on Morpheme Flutter Starter Kit, please clone it first and configure it based on the documentation on the following link **[Morpheme Flutter Starter Kit](../starter_kit/started)**
+The CLI is designed for use with the **Morpheme Flutter Starter Kit**. Please clone and configure the starter kit first:
+**[Morpheme Flutter Starter Kit](../starter_kit/started)**
 
 :::

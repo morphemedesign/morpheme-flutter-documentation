@@ -4,104 +4,77 @@ sidebar_position: 11
 
 # Cucumber
 
-This command to execute integration test just support for implemented dependency [Morpheme Cucumber](https://pub.dev/packages/morpheme_cucumber) which this package builds on top of `patrol` and `integration_test` to make it easy to integration test with gherkin language. For more info about Morpheme Cucumber you can follow on [Documentation](https://pub.dev/packages/morpheme_cucumber).
+This command allows you to run integration tests written in the [Gherkin](https://cucumber.io/docs/gherkin/reference/) language using the `morpheme_cucumber` package. It bridges the gap between readable feature files and Flutter's integration test driver.
 
-## Installation
-
-Requirement
-
-1. Install [Flutter](https://docs.flutter.dev/get-started/install) and another installation e.g Android Studio, Xcode. you can check in this command:
-
-    ```sh
-    flutter doctor
-    ```
-
-2. After install Flutter then install morpheme_cli with command:
-
-    ```sh
-    dart pub global activate morpheme_cli
-    ```
-
-    now you can run this command to check:
-
-    ```sh
-    morpheme_cli doctor
-    ```
-
-    If this directory is missing from your PATH, locate the file for your platform and add it.
-
-    | Platform       | Cache location               |
-    |----------------|------------------------------|
-    | macOS or Linux | HOME/.pub-cache/bin          |
-    | Windows*       | %LOCALAPPDATA%\Pub\Cache\bin |
-
-3. Install gherkin executable and make sure to export to your PATH from this [Gherkin Executable](https://github.com/morphemedesign/morpheme-flutter-cli/releases/tag/cucumber)
-4. Install nodejs for generate cucumber json to report html [NodeJs](https://nodejs.org/en/download/)
-
-Congratulation now you are ready for Instant Integration Test 🎉🎉🎉
-
-## How to Run
-
-First connect your device to your machine or open emulator / simulator
-
-Install dependency with command:
-
-```sh
-morpheme_cli get
+```bash
+morpheme cucumber
 ```
 
-Once your done installation, then run command:
+## Description
 
-```sh
-morpheme_cli cucumber
+The `cucumber` command automates the following workflow:
+1.  **Generates Localization**: (Optional) Ensures your l10n files are up-to-date.
+2.  **Processes Features**: Discovers and parses `.feature` files in `integration_test/features`.
+3.  **Compiles Tests**: Converts Gherkin scenarios into a format executable by the test runner.
+4.  **Runs Tests**: Executes `integration_test/cucumber_test.dart` on a connected device/emulator.
+5.  **Generates Reports**: Creates JSON and (if Node.js is available) HTML reports of the test results.
+
+## Prerequisites
+
+1.  **Flutter**: Installed and available in PATH.
+2.  **Gherkin CLI**: Required to parse feature files.
+    Install gherkin executable and make sure to export to your PATH from this [Gherkin Executable](https://github.com/morphemedesign/morpheme-flutter-cli/releases/tag/cucumber)
+3.  **Node.js**: (Optional) Required for generating HTML reports.
+    Install nodejs for generate cucumber json to report html [NodeJs](https://nodejs.org/en/download/)
+
+## Usage
+
+### Run All Tests
+Executes all feature files found in `integration_test/features`.
+
+```bash
+morpheme cucumber
 ```
 
-or your need to be specific feature you can do run command:
+### Run Specific Features
+Run only the `login` and `profile` feature files (e.g., `login.feature`, `profile.feature`).
 
-```sh
-morpheme_cli cucumber login
+```bash
+morpheme cucumber login,profile
 ```
 
-or multiple
+### Run with Flavors
+Run tests against a specific environment flavor (default is `dev`).
 
-```sh
-morpheme_cli cucumber login,register,home
+```bash
+morpheme cucumber --flavor staging
 ```
 
-by default run `integration_test/cucumber_test.dart` by flavor dev. if you want to running flavor stag or prod just add argument `--flavor stag` or `--flavor prod`
+### Run on Specific Device
+target a specific device or emulator by its ID.
 
-example run flavor stag
-
-```sh
-morpheme_cli cucumber --flavor stag
+```bash
+morpheme cucumber --device-id emulator-5554
 ```
 
 ## Options
 
 ```bash
-morpheme cucumber [arguments]
+morpheme cucumber [features] [options]
 ```
 
 To see all available options and flags, run `morpheme cucumber --help`.
 
 ### Available Options
 
-- Custom Morpheme Yaml :
+| Option | Abbr | Description |
+|---|---|---|
+| `--flavor [env]` | `-f` | Target environment flavor (default: `dev`). |
+| `--device-id [id]` | `-d` | Target specific device identifier for testing. |
+| `--[no-]generate-l10n` | | Generate localization files before testing (default: `true`). |
+| `--morpheme-yaml [path]` | | Path to a custom configuration file. |
 
-| Custom Morpheme Yaml | Description |
-|----------|-------------|
-| `--morpheme-yaml [path_file]` | This command is used to select yaml config the application in a specific file, by default it will run the `morpheme.yaml` file. |
-
-- Flavor/Environment :  
-  
-| Flavor/Environment | Alternative | Description |
-|----------|-------------|-------------|
-| `-f dev` | `--flavor dev` | Run project on dev environment (Default) |
-| `-f stag` | `--flavor stag` | Run project on staging environment|
-| `-f prod` | `--flavor prod` | Run project on production environment |
-
-- Generate l10n :  
-  
-| Generate l10n | Description |
-|----------|-------------|-------------|
-| `--[no]l10n` | Generate l10n first before running other command. (defaults to on) |
+:::tip
+Combine arguments for precise testing control:
+`morpheme cucumber login --flavor prod --device-id DEVICE_ID`
+:::

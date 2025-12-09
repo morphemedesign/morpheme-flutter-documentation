@@ -87,8 +87,7 @@ To see all available options and flags, run `morpheme init --help`.
 
 ### Available Options
 
-- App Name :
-
-| App Name | Description |
-|----------|-------------|
-| `--app-name [app-name]` | Define application name in generate morpheme.yaml |
+| Option | Description |
+|---|---|
+| `--app-name [name]` | Define application name in generate morpheme.yaml (default: 'morpheme') |
+| `--application-id [id]` | Define application ID (e.g. com.example.app) in generate morpheme.yaml (default: 'design.morpheme') |

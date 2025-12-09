@@ -4,65 +4,70 @@ sidebar_position: 3
 
 # Page
 
-The morpheme page command has several options and arguments that can be used to create a new page in a feature module. To create a new page in a feature module, you must provide the feature name using the -f or --feature-name option. You can also specify other options depending on how you want to create the page. For example, to create a new page with just UI pages and Cubit, you can use the following command:
+This command generates a new page within an existing feature module, following the project's Clean Architecture structure. It creates the necessary directories and files for the data, domain, and presentation layers, and registers the new page in the feature's Locator.
 
 ```bash
-morpheme page [page-name] -f <feature-name>
+morpheme page [page-name] -f [feature-name]
+```
+
+## Description
+The `page` command scaffolds a complete module structure for a specific screen or functional unit within a feature. This ensures consistency and enforces separation of concerns.
+
+## Directory Structure
+When you run the command, it generates the following structure inside your feature's directory:
+
+```
+features/[feature_name]/lib/[page_name]/
+├── data/
+│   ├── datasources/         # Remote/Local data sources
+│   ├── models/              # Data models (Body, Response)
+│   │   ├── body/
+│   │   └── response/
+│   └── repositories/        # Repository implementations
+├── domain/
+│   ├── entities/            # Domain entities
+│   ├── repositories/        # Repository interfaces
+│   └── usecases/            # Business logic use cases
+├── presentation/
+│   ├── bloc/                # Business Logic Components (BLoCs)
+│   ├── cubit/               # Cubits for state management
+│   ├── pages/               # UI Page (Widget)
+│   └── widgets/             # Reusable widgets for this page
+├── locator.dart             # Dependency injection setup for this page
+└── mapper.dart              # Data to Domain mappers
 ```
 
 ## Example
 
-Here's an example of how you can use the morpheme page command to create a new page in the users feature module, with the feature name set to master:
+To create a `login` page inside the `auth` feature:
 
 ```bash
-morpheme page users -f master
+morpheme page login -f auth
 ```
 
-As you can see, the command has generated the following files and folders in the users feature module:
+To create a page inside a specific app (for monorepo structures):
 
-- lib/users/presentation/cubit/users_cubit.dart: The Cubit file for the new page.
-- lib/users/presentation/pages/users_page.dart: The UI page file for the new page.
-- lib/users/presentation/widgets/.gitkeep: An empty file to preserve the widgets folder.
-- lib/users/locator.dart: The locator file for the users feature module.
-- lib/locator.dart: The main locator file for the entire project.
+```bash
+morpheme page login -f auth -a my_app
+```
 
-With these files and folders generated, you can now start adding your own code to create the new page in the users feature module.
-
-![File generated](../../../static/img/generate/page/user_page.png)
-
-:::caution
-
-Page will not be generated if:
-
-- The feature that we enter does not exist
-- The page name we entered already exists
-
-:::
+## Validations
+The command will fail if:
+1.  The specified **Feature** directory does not exist.
+2.  A **Page** with the same name already exists in that feature.
 
 ## Options
 
 ```bash
-morpheme page [page-name] [arguments]
+morpheme page [page-name] [options]
 ```
 
 To see all available options and flags, run `morpheme page --help`.
 
 ### Available Options
 
-- Custom Morpheme Yaml :
-
-| Custom Morpheme Yaml | Description |
-|----------|-------------|
-| `--morpheme-yaml [path_file]` | This command is used to select yaml config the application in a specific file, by default it will run the `morpheme.yaml` file. |
-
-- Specific Apps Name :  
-  
-| Apps Name | Alternative | Description |
-|----------|-------------|-------------|
-| `-a [apps-name]` | `--apps-name [apps-name]` | Name of the apps to be added page. |
-
-- Specific Feature :  
-  
-| Specific Feature | Alternative | Description |
-|----------|-------------|-------------|
-| `-f [feature-name]` | `--feature-name [feature-name]` | Specifies the name of the feature for which the page is being created. This option is mandatory. |
+| Option | Abbr | Description | Mandatory |
+|---|---|---|---|
+| `--feature-name` | `-f` | The name of the feature module where the page will be created. | **Yes** |
+| `--apps-name` | `-a` | The name of the app (context) if utilizing an apps-based directory structure. | No |
+| `--morpheme-yaml` | | Path to a custom configuration file (default: `morpheme.yaml`). | No |

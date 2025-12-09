@@ -32,41 +32,90 @@ LCOV is an extension of GCOV, a GNU tool which provides information about
 check your installation with run:
 
 ```bash
-lcov -v
+morpheme coverage
 ```
 
-or you can run command:
+## Prerequisites
 
+You must have `lcov` installed to generate HTML reports.
+
+-   **macOS**: `brew install lcov`
+-   **Ubuntu**: `apt-get install lcov`
+-   **Windows**: (Not fully supported automatically) Install Perl and LCOV manually.
+
+Verify installation:
 ```bash
-morpheme doctor
+lcov --version
 ```
+
+## Configuration (`morpheme.yaml`)
+
+You can configure output directories and exclude specific files from the coverage report (e.g., generated code, mocks) in your `morpheme.yaml`.
+
+```yaml
+coverage:
+  output_html_dir: "coverage/html" # Directory for the HTML report
+  remove:
+    - "**/generated/**"
+    - "**/mock/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+```
+
+## Description
+
+The `coverage` command performs the following steps:
+1.  **Execute Tests**: Runs `flutter test --coverage` across your project.
+2.  **Merge Results**: Combines `lcov.info` files from the main project, core, and all features.
+3.  **Filter**: Removes files matching the patterns defined in `morpheme.yaml`.
+4.  **Generate Report**: Creates an HTML site in `coverage/html` (or your configured path) to visualize line-by-line coverage.
 
 ## Usage
 
-This command is used to calculate our code coverage based on the tests that have been made. Code coverage will not be generated if all the tests we make have not been passed.
+### Coverage for Entire Project
 
 ```bash
 morpheme coverage
 ```
 
-:::caution
+### Coverage for Specific Scopes
 
-`morpheme coverage` support for Linux and macOS.
+You can limit the coverage analysis to a specific app, feature, or page to save time.
 
-:::
+```bash
+# Analyze specific app
+morpheme coverage -a driver
+
+# Analyze specific feature
+morpheme coverage -f auth
+
+# Analyze specific page
+morpheme coverage -f auth -p login
+```
+
+### Custom Reporters
+
+Output test results to different formats or files, useful for CI/CD integration.
+
+```bash
+morpheme coverage --reporter json --file-reporter json:report.json
+```
 
 ## Options
 
 ```bash
-morpheme coverage [arguments]
+morpheme coverage [options]
 ```
 
 To see all available options and flags, run `morpheme coverage --help`.
 
 ### Available Options
 
-- Custom Morpheme Yaml :
-
-| Custom Morpheme Yaml | Description |
-|----------|-------------|
-| `--morpheme-yaml [path_file]` | This command is used to select yaml config the application in a specific file, by default it will run the `morpheme.yaml` file. |
+| Option | Abbr | Description |
+|---|---|---|
+| `--apps` | `-a` | Generate coverage for a specific app. |
+| `--feature` | `-f` | Generate coverage for a specific feature. |
+| `--page` | `-p` | Generate coverage for a specific page. |
+| `--reporter` | `-r` | output format: `compact` (default), `expanded`, `json`, `github`, etc. |
+| `--file-reporter` | | Save results to file. Format: `<reporter>:<filepath>`. |
+| `--morpheme-yaml` | | Path to a custom configuration file. |

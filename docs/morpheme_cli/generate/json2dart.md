@@ -1,205 +1,199 @@
----
-sidebar_position: 5
----
-
 # Json2Dart
 
-This command is used to generate the API based on the configuration json file in the `json2dart/json2dart.yaml` file
+This command generates a complete API integration layer (models, entities, repositories, datasources, and BLoCs) based on the configuration in `json2dart/json2dart.yaml`. It follows Clean Architecture principles and supports advanced features like caching, multipart requests, and custom return types.
 
 ```bash
 morpheme json2dart
 ```
 
-:::info
+## Directory Structure
 
-The generated API will be available according to the features and pages that we configure.
+To start using `json2dart`, you should have a `json2dart` directory in the root of your project:
 
-:::
-
-:::note json2dart.yaml Configuration
-To add API we have to add this following line:
-
-```yaml title="json2dart/json2dart.yaml"
-feature_name:
-    page_name:
-        api_name:
-            base_url: base_url
-            path: endpoint_name
-            method: your_api_method
-            body: url_file_body_json
-            response: url_file_response_json
-            header: url_file_hearder_json // optional
-            cache_stategy: cache_stategy // optional
+```
+.
+├── json2dart/
+│   ├── json/
+│   │   ├── body/            # JSON files for request bodies
+│   │   ├── response/        # JSON files for API responses
+│   │   └── header/          # JSON files for custom headers
+│   └── json2dart.yaml       # Main configuration file
+└── morpheme.yaml
 ```
 
-Cache Strategy :
+## Configuration (`json2dart.yaml`)
 
-Inside json2dart.yaml there are `cache_strategy` allow additions: `async_or_cache`, `cache_or_async`, `just_async`, `just_cache`. by default set to `just_async`.
+The `json2dart.yaml` file is the heart of this tool. It allows you to define global settings and detailed API specifications.
 
-- `async_or_cache` : strategy to fetch the api first and cache the response. if fetch fails it will return data from cache.
-- `cache_or_async` : strategy if there is data in the cache and it is not expired then it will return data from the cache first. otherwise it will fetch api and responsen will be cached.
-- `just_async` : a strategy that only fetches the api to get the data.
-- `just_cache` : a strategy that only gets data from cache.
+### Global Configuration
 
-```yaml title="Simple Implementation"
+Configurations under the `json2dart` key apply globally to the generation process.
+
+```yaml title="json2dart/json2dart.yaml"
+json2dart:
+  api: true                          # Generate API implementation (default: true)
+  endpoint: true                     # Generate Endpoint class (default: true)
+  unit-test: false                   # Generate unit tests (default: false)
+  replace: false                     # Replace existing files (default: false)
+  format: true                       # Format generated code (default: true)
+  cubit: true                        # Update Cubit with new repositories (default: true)
+  body_format_date_time: "yyyy-MM-dd"         # Date format for request bodies
+  response_format_date_time: "yyyy-MM-dd"     # Date format for responses
+```
+
+### API Definition Structure
+
+APIs are defined hierarchically by **Feature** -> **Page** -> **API Name**.
+
+```yaml title="json2dart/json2dart.yaml"
+# ... Global config ...
+
+feature_name:                # 1. Feature Name
+  page_name:                 # 2. Page Name
+    api_name:                # 3. API Name (Method name in code)
+      # Essential Properties
+      path: /users/login
+      method: post
+      
+      # Data Sources
+      body: json2dart/json/body/login_body.json
+      response: json2dart/json/response/login_response.json
+      header: json2dart/json/header/login_header.json
+      
+      # Advanced Properties
+      return_data: model     # Options: model, header, body_bytes, etc.
+      
+      # Caching
+      cache_strategy:
+        strategy: async_or_cache
+        ttl: 60              # Time to live in minutes
+        keep_expired_cache: true
+```
+
+## API Properties Detail
+
+| Property | Description | Default |
+|---|---|---|
+| `path` | The API endpoint path. Can include parameters like `/users/$id`. | Required |
+| `method` | HTTP method to use. See **Supported Methods**. | `get` |
+| `body` | Path to a JSON file representing the request body. | `null` |
+| `response` | Path to a JSON file representing the success response. | `null` |
+| `header` | Path to a JSON file containing custom headers. | `null` |
+| `return_data` | Specifies the type of data the repository should return. See **Return Types**. | `model` |
+| `cache_strategy` | Configuration for API response caching. See **Caching**. | `null` |
+| `dir_extra` | Path to a directory where extra models (if any) should be generated. | `null` |
+
+### Supported Methods
+
+Values for `method`:
+- **Standard**: `get`, `post`, `put`, `patch`, `delete`, `head`
+- **Multipart**: `multipart` (defaults to POST), `postMultipart`, `patchMultipart`
+- **SSE**: `getSse`, `postSse`, `putSse`, `patchSse`, `deleteSse`
+- **Other**: `download`
+
+### Return Types
+
+Values for `return_data`:
+- `model`: Returns a parsed Dart object (Entity).
+- `header`: Returns only the response headers.
+- `body_bytes`: Returns the response body as bytes (`List<int>`).
+- `body_string`: Returns the response body as a String.
+- `status_code`: Returns the integer status code of the response.
+- `raw`: Returns the raw `Response` object.
+
+### Caching
+
+You can configure caching strategies to improve app performance and offline capability.
+
+**Simple Syntax (Strategy only):**
+```yaml
 cache_strategy: async_or_cache
 ```
 
-```yaml title="Detail Implementation"
-cache_strategy: 
+**Detailed Syntax:**
+```yaml
+cache_strategy:
   strategy: async_or_cache
-  ttl: 60 #in Minutes
-  keep_expired_cache: true 
+  ttl: 60                     # Cache validity in minutes
+  keep_expired_cache: true    # If true, returns expired cache while fetching new data
 ```
 
-Extra notes:
+**Available Strategies:**
+- `async_or_cache`: Fetch from API. If it fails, try to return cached data.
+- `cache_or_async`: Check cache first. If valid, return it. If not, fetch from API.
+- `just_async`: (Default) Always fetch from API. No caching.
+- `just_cache`: Always return cached data. Fails if no cache exists.
 
-- We can add more than one api on a page.
-- Allowed methods: get, post, put, patch, delete & multipart.
-- Options : (We need to add this manually)
+## Environment Variables
 
-  ```yaml title="json2dart/json2dart.yaml"
-    ...
-    json2dart:
-        body_format_date_time: yyyy-MM-dd // default is .toIso8601String()
-        response_format_date_time: yyyy-MM-dd HH:mm // default is .toIso8601String()
-        api: true // default is true
-        endpoint: true // default is true
-        unit-test: false // default is false
-        replace: false // default is false
-    ...
-    ```
+You can use anchors in YAML to manage different environments or repeated URLs.
 
-:::
+```yaml
+json2dart:
+  # ... options ...
+  environment_url:
+    - &base_url BASE_URL    # Define anchor *base_url
 
-For example, we will add the delete user API to page users in the master feature using json2dart, here are the steps:
+feature_name:
+  page_name:
+    login:
+      base_url: *base_url   # Use anchor
+      path: /login
+      # ...
+```
 
-1. Add json files for "response" and "body" API, response json files in `json2dart/json/response/`, for body json files `json2dart/json/body/`
+## Workflow Example
 
-    ![File generated](../../../static/img/generate/api/body_response.png)
-
-    ```json title="json2dart/json/body/delete_user_body.json"
+1.  **Create JSON Files**:
+    Create `login_body.json` inside `json2dart/json/body/`:
+    ```json
     {
-        "id_user":"id_user"
+      "email": "user@example.com",
+      "password": "password123"
+    }
+    ```
+    Create `login_response.json` inside `json2dart/json/response/`:
+    ```json
+    {
+      "token": "abc-123-xyz",
+      "user": { "id": 1, "name": "John" }
     }
     ```
 
-    ```json title="json2dart/json/response/delete_user_response.json"
-    {}
-    ```
-
-2. Add the delete_user API configuration to the `json2dart/json2dart.yaml` file
-
-    ```yaml title="json2dart/json2dart.yaml"
-    json2dart:
-        body_format_date_time: yyyy-MM-dd
-        response_format_date_time: yyyy-MM-dd HH:mm
-        api: true
-        endpoint: true
-        unit-test: false
-        replace: false
-
-        environment_url:
-            - &base_url BASE_URL
-
-        remote:
-            .login: &login
-                base_url: *base_url
-                path: /login
-                method: post
-                # header: json2dart/json/header/login_header.json
-                body: json2dart/json/body/login_body.json
-                response: json2dart/json/response/login_response.json
-                cache_strategy: async_or_cache
-            .register: &register
-                base_url: *base_url
-                path: /register
-                method: post
-                # header: json2dart/json/header/register_header.json
-                body: json2dart/json/body/register_body.json
-                response: json2dart/json/response/register_response.json
-                cache_strategy:
-                    strategy: cache_or_async
-                    ttl: 60
-            .forgot_password: &forgot_password
-                base_url: *base_url
-                path: /forgot_password
-                method: get
-                # header: json2dart/json/header/forgot_password_header.json
-                body: json2dart/json/body/forgot_password_body.json
-                response: json2dart/json/response/forgot_password_response.json
-                cache_strategy:
-                    strategy: just_cache
-                    ttl: 120
-                    keep_expired_cache: true
-            # Add delete user
-            delete_user: # api-name
-                base_url: *base_url
-                path: /delete_user
-                method: delete
-                body: json2dart/json/body/delete_user_body.json
-                response: json2dart/json/response/delete_user_response.json
-                cache_strategy: just_async
+2.  **Configure `json2dart.yaml`**:
+    ```yaml
     auth:
+      login:
         login:
-            login: *login
-        register:
-            register: *register
-        forgot_password:
-            forgot_password: *forgot_password
-    # Add delete user
-    master:
-        users:
-            delete_user: *delete_user
+          method: post
+          path: /auth/login
+          body: json2dart/json/body/login_body.json
+          response: json2dart/json/response/login_response.json
     ```
 
-3. Generate API with this command
-
+3.  **Run Command**:
     ```bash
     morpheme json2dart
     ```
 
-    The delete user API is automatically added to page users in the feature master, after that we need to add the BLoC to our Cubit.
+4.  **Result**:
+    The CLI generates:
+    - `LoginBody` class (Request model)
+    - `LoginResponse` class (Response model)
+    - `LoginEntity` class (Domain entity)
+    - `LoginRepository` and `LoginDataSource`
+    - Updates `LoginCubit` to include `LoginBloc`
 
-## Options
+## Command Options
 
 ```bash
-morpheme json2dart [arguments]
+morpheme json2dart [options]
 ```
 
-To see all available options and flags, run `morpheme json2dart --help`.
-
-### Available Options
-
-- Custom Morpheme Yaml :
-
-| Custom Morpheme Yaml | Description |
-|----------|-------------|
-| `--morpheme-yaml [path_file]` | This command is used to select yaml config the application in a specific file, by default it will run the `morpheme.yaml` file. |
-
-- Specific Apps Name :  
-  
-| Apps Name | Alternative | Description |
-|----------|-------------|-------------|
-| `-a [apps-name]` | `--apps-name [apps-name]` | Generate spesific apps (Optional) |
-
-- Specific Feature :  
-  
-| Specific Feature | Alternative | Description |
-|----------|-------------|-------------|
-| `-f [feature-name]` | `--feature-name [feature-name]` | Generate json2dart spesific feature which has been registered in `json2dart/json2dart.yaml` |
-
-- Specific Page :  
-  
-| Specific Page | Alternative | Description |
-|----------|-------------|-------------|
-| `-p [page-name]` | `--page-name [page-name]` | Generate json2dart spesific page which has been registered in `json2dart/json2dart.yaml` must include `--feature-name` option |
-
-- Flags :
-  
-| App Version | Description |
-|----------|-------------|
-| `--[no-]api` | Set generated models with implement api. (defaults to on) |
-| `--[no-]unit-test` | Generate unit test for api implementation. (defaults to off) |
-| `--[no-]endpoint` | Generate endpoint from path json2dart.yaml. (defaults to on) |
-| `--[no-]replace` | Replace value generated. if set to false will be delete all directory generated json2dart before. (defaults to off) |
+| Option | Abbr | Description |
+|---|---|---|
+| `--feature-name` | `-f` | Generate for a specific feature only. |
+| `--page-name` | `-p` | Generate for a specific page (requires `-f`). |
+| `--apps-name` | `-a` | Generate for a specific app (in a monorepo setup). |
+| `--morpheme-yaml` | | Path to custom `morpheme.yaml`. |
+| `--verbose` | `-v` | Show detailed logs for debugging. |

@@ -33,4 +33,6 @@ gherkin use for 'morpheme cucumber' command
 npm use for create report integration test after 'morpheme cucumber' command
 [✓] lcov installed
 lcov use for 'morpheme coverage' command
+[✓] Shorebird installed
+shorebird use for Flutter code push 'morpheme shorebird' command
 ```

@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Help
 
-This command is used to view the list contained in the CLI.
+This command displays a comprehensive list of all available Morpheme CLI commands, organized by category.
 
 ```bash
 morpheme -h
@@ -16,7 +16,9 @@ Alternative:
 morpheme --help
 ```
 
-```bash title="Output"
+## Output
+
+```bash
 Morpheme CLI Boost productivity with modular project creation, API generation & folder structuring tools. Simplify Flutter dev! #Flutter #CLI
 
 Usage: morpheme <command> [arguments]
@@ -28,45 +30,71 @@ Global options:
 Available commands:
 
 Build
-  build            Build an app to android or ios
-  prebuild         Prepare setup ios before build
+  build                Build applications for Android, iOS, and web platforms.
+  prebuild             Prepare setup before build
 
 Generate
-  api              Create a new api in page.
-  apps             Create a new apps module.
-  assets           Generate assets from setup assets pubspec.yaml.
-  color2dart       Generate dart color class from yaml.
-  config           Generate launch.json & tasks.json related with config.
-  core             Create a new core packages module.
-  endpoint         Generate endpoint from json2dart.yaml.
-  feature          Create a new feature module.
-  firebase         Generate google service both android & ios.
-  json2dart        Generate dart data class from json.
-  l10n             Generate localizations for the current project.
-  local2dart       Generate sqlite yaml to dart sqlite class helper
-  page             Create a new page in feature module.
-  remove-apps      Remove code apps.
-  remove-feature   Remove code feature.
-  remove-page      Remove code page in spesific feature.
+  api                  Create a new api in page.
+  apps                 Create a new apps module.
+  assets               Generate asset constants from Flutter pubspec.yaml definitions.
+  color2dart           Generate dart color class from yaml.
+  config               Generate VS Code and Android Studio IDE configurations.
+  core                 Create a new core packages module.
+  endpoint             Generate endpoint from json2dart.yaml.
+  feature              Create a new feature module.
+  firebase             Generate google service both android & ios.
+  json2dart            Generate dart data class from json.
+  json2dart-legacy     (Deprecated) Generate dart data class from json.
+  l10n                 Generate localizations for the current project.
+  local2dart           Generate sqlite yaml to dart sqlite class helper
+  page                 Create a new page in feature module.
+  remove-apps          Remove an app module from the project.
+  remove-feature       Remove a feature module from the project.
+  remove-page          Remove a page from a specific feature.
+  remove-test          Remove test helper files from the project.
+  template-test        Generate template test code based on json2dart.yaml.
 
 Project
-  analyze          Analyze code in all packages.
-  clean            Delete the l10n, build/ and .dart_tool/ in main, core & features directories.
-  coverage         Run Flutter test coverage for the current project & all modules.
-  create           Create flutter application with Morpheme Flutter Starter Kit
-  cucumber         Generate integration test from gherkin in .feature
-  format           Format all files .dart.
-  get              Get packages in a Flutter project, Core & Features.
-  refactor         Refactor naming old to new naming
-  run              Run your Flutter app on an attached device with flavor.
-  test             Run Flutter unit tests for the current project & all modules.
-  unused-l10n      Unused l10n all files .dart.
-  upgrade          Upgrade the current package's dependencies to latest versions..
+  analyze              Analyze code quality in all packages using Flutter analyzer.
+  clean                Clean generated files, build artifacts, and cache from all packages.
+  coverage             Generate comprehensive test coverage reports with HTML visualization for the project and all modules.
+  create               Create a new Flutter application with Morpheme Flutter Starter Kit
+  cucumber             Run integration tests from Gherkin .feature files with comprehensive reporting
+  download             Download external resources and dependencies as configured in morpheme.yaml.
+  fix                  Apply automated fixes to Dart source code across project modules.
+  format               Format Dart source code across all project modules.
+  get                  Retrieve dependencies for all project packages and features.
+  ic-launcher          Deploy launcher icons to platform-specific directories for the specified flavor.
+  refactor             Systematically refactor and rename project components while maintaining code integrity.
+  run                  Run your Flutter app on an attached device with flavor.
+  test                 Execute Flutter unit tests for the project and all modules with optional coverage analysis.
+  unused-l10n          Detect and report unused localization keys in Dart files (optimized for large codebases).
+  upgrade-dependency   Upgrade package dependencies to their latest compatible versions.
+
+Shorebird
+  shorebird            Shorebird Code Push is a tool that allows you to update your Flutter app instantly over the air.
 
 Tools
-  changelog        get latest changelog
-  doctor           Show information about the installed tooling.
-  init             Init a new project from starter kit
+  doctor               Show information about the installed tooling.
+  init                 Initialize a new project with Morpheme configuration
+  rename               Rename files to snake_case with optional prefix/suffix
+  upgrade              Upgrade Morpheme CLI to the latest version
 
 Run "morpheme help <command>" for more information about a command.
+```
+
+## Getting Help for Specific Commands
+
+To view detailed help for any specific command, use:
+
+```bash
+morpheme help <command>
+```
+
+For example:
+
+```bash
+morpheme help create
+morpheme help generate feature
+morpheme help test
 ```

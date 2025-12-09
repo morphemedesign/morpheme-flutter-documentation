@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Version
 
-This command is used to check the CLI version.
+This command displays the currently installed version of the Morpheme CLI.
 
 ```bash
 morpheme -v
@@ -16,6 +16,16 @@ Alternative:
 morpheme --version
 ```
 
-```bash title="Output"
-Morpheme CLI 1.0.0
+## Output
+
+```bash
+Morpheme CLI 4.0.0
+```
+
+## Checking for Updates
+
+To upgrade to the latest version of Morpheme CLI, use:
+
+```bash
+morpheme upgrade
 ```

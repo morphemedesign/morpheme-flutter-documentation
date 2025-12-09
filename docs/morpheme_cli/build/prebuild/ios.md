@@ -2,11 +2,25 @@
 sidebar_position: 1
 ---
 
-# Pre Build Ios
+# Prebuild iOS
 
-This command aims to generate an ios configuration file before the build process is carried out, usually used for CI/CD needs.
+This command prepares the iOS build environment by generating necessary configuration files for CI/CD pipelines and automated builds.
 
-Here is 1 file needed which is in `ios/deployment/appstore_deployment.json`:
+```bash
+morpheme prebuild ios
+```
+
+## Description
+
+The `prebuild ios` command automates the setup of iOS build configurations, particularly useful for CI/CD environments. It generates essential files for code signing, team configuration, and export options based on your deployment settings.
+
+:::caution macOS Required
+This command only works on macOS with Xcode installed.
+:::
+
+## Configuration File
+
+Create a deployment configuration file at `ios/deployment/appstore_deployment.json`:
 
 ```json
 {
@@ -14,13 +28,13 @@ Here is 1 file needed which is in `ios/deployment/appstore_deployment.json`:
     "email_identity": "ios@morpheme.id",
     "itc_team_id": "96184904",
     "team_id": "P53KJ6MXZH",
-    "provisioning_profiles": "Morpheme Flutter Starter Kit"
+    "provisioning_profiles": "Morpheme Flutter Starter Kit Dev"
   },
   "stag": {
     "email_identity": "ios@morpheme.id",
     "itc_team_id": "96184904",
     "team_id": "P53KJ6MXZH",
-    "provisioning_profiles": "Morpheme Flutter Starter Kit"
+    "provisioning_profiles": "Morpheme Flutter Starter Kit Staging"
   },
   "prod": {
     "email_identity": "ios@morpheme.id",
@@ -31,66 +45,85 @@ Here is 1 file needed which is in `ios/deployment/appstore_deployment.json`:
 }
 ```
 
-Here are flavors `dev`, `stag` and `prod`.
+### Configuration Fields
 
-- `email_identity` is email used to identity in runner
-- `itc_team_id` is  App Store Connect Team ID
-- `team_id` is Developer Portal Team ID
-- `provisioning_profiles` is Name of Provisioning Profile
+| Field | Description |
+|---|---|
+| `email_identity` | Apple ID email used for code signing |
+| `itc_team_id` | App Store Connect Team ID |
+| `team_id` | Developer Portal Team ID |
+| `provisioning_profiles` | Name of the provisioning profile |
 
-If so, do the command:
+## Usage
 
+### Basic Prebuild (Dev)
 ```bash
-morpheme prebuild ios -f [flavor]
+morpheme prebuild ios
 ```
 
-## Generate Results
+### Prebuild for Specific Flavor
+```bash
+morpheme prebuild ios --flavor prod
+```
 
-There are 3 files that will be generated from this ios prebuild:
+## Generated Files
 
-- `ios/fastlane/Appfile`
-- `ios/Runner.xcodeproj/project.pbxproj`
-- `ios/ExportOptions.plist`
+This command generates the following files:
+
+1. **`ios/fastlane/Appfile`**
+   - Fastlane configuration with App Store Connect credentials
+   
+2. **`ios/Runner.xcodeproj/project.pbxproj`**
+   - Xcode project file with updated code signing settings
+   
+3. **`ios/ExportOptions.plist`**
+   - Export options for IPA generation
 
 ## Options
 
-- Flavor/Environment :  
-  
-| Flavor/Environment | Alternative | Description |
-|----------|-------------|-------------|
-| `-f dev` | `--flavor dev` | Pre Build project on dev environment (Default) |
-| `-f stag` | `--flavor stag` | Pre Build project on staging environment|
-| `-f prod` | `--flavor prod` | Pre Build project on production environment |
+```bash
+morpheme prebuild ios [options]
+```
 
-## Migration
+To see all available options and flags, run `morpheme prebuild ios --help`.
 
-To migrate from previous version just add the file `ios/deployment/appstore_deployment.json` which was described earlier then in `.gitlab-ci.yml`
+### Available Options
 
-```diff title=".gitlab-ci.yml"
+| Option | Abbr | Description |
+|---|---|---|
+| `--flavor [env]` | `-f` | Build flavor (dev, stag, prod). Default: `dev`. |
+| `--morpheme-yaml [path]` | | Path to a custom configuration file. |
+
+## CI/CD Integration
+
+### GitLab CI Example
+
+Update your `.gitlab-ci.yml` to use the prebuild command:
+
+```yaml
 .build-ios:
   stage: build_ios
-  resource_group: build_and_deploy_ios
-  allow_failure: false
   script:
-    # Get version name & build number from tag
-    - IFS='-' # Read the split words into an array based on dash delimiter.
+    # Get version from tag
+    - IFS='-'
     - read -a strarr <<< "$CI_COMMIT_TAG"
     - VERSION_NAME=${strarr[1]}
     - BUILD_NUMBER=${strarr[2]}
-    # Setup key ios
--   - echo "$APP_STORE_JSON" > "$PATH_APP_STORE_JSON"
-+   - morpheme_cli prebuild ios -f ${CI_ENVIRONMENT_NAME}
-    # Change working directory to ios
+    
+    # Prepare iOS build environment
+    - morpheme prebuild ios -f ${CI_ENVIRONMENT_NAME}
+    
+    # Setup provisioning
     - cd ios
-    # Set up code signing settings on Xcode project.
     - chmod +x deployment/provisioning.sh
     - ./deployment/provisioning.sh
     - pod install --repo-update
-    # Change working directory to root
     - cd ..
-    # Build ipa
-    - morpheme_cli build ipa -f ${CI_ENVIRONMENT_NAME} --build-number=$BUILD_NUMBER --build-name=$VERSION_NAME --export-options-plist="$PATH_EXPORT_OPTIONS_PLISTS"
-  # artifacts: # If you want to generate artifacts, uncomment this script.
-  #   paths:
-  #   - $PATH_IPA
+    
+    # Build IPA
+    - morpheme build ipa -f ${CI_ENVIRONMENT_NAME} --build-number=$BUILD_NUMBER --build-name=$VERSION_NAME
 ```
+
+:::tip
+This command eliminates the need to manually manage `Appfile` and `ExportOptions.plist` files, making your CI/CD pipeline more maintainable.
+:::

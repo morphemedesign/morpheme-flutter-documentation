@@ -1,67 +1,83 @@
 ---
 sidebar_position: 9
 ---
-
 # Firebase
 
-This command is used to generate firebase configuration used cli `flutterfire` which recommendation from [firebase reference](https://firebase.google.com/docs/flutter/setup?platform=ios) for flutter.
+
+This command sets up Firebase integration for your Flutter project by automating the `flutterfire` CLI. It supports flavor-specific configurations and CI/CD workflows using service accounts.
+
+```bash
+morpheme firebase
+```
 
 ## Setup
 
-In firebase have flavor and each flavor can be different project setup.
+Configure your Firebase projects in `morpheme.yaml`. Each flavor can point to a different Firebase project.
 
-```morpheme.yaml title="morpheme.yaml"
-...
+```yaml title="morpheme.yaml"
 firebase:
-  dev: #flavor
+  dev:
     project_id: "morpheme-dev"
-    token: "YOUR FIREBASE TOKEN: firebase login:ci"
-    platform: "android,ios,web" #optional
-    android_package_name: "design.morpheme.dev" #optional by default use from flavor[ANDROID_APPLICATION_ID]
-    ios_bundle_id: "design.morpheme.dev" #optional by default use from flavor[IOS_APPLICATION_ID]
-    web_app_id: "YOUR WEB APP ID" #optional
-  stag:
-    project_id: "morpheme-stag"
-    token: "YOUR FIREBASE TOKEN: firebase login:ci"
+    token: "YOUR_FIREBASE_TOKEN" # Optional: get from `firebase login:ci`
+    platform: "android,ios,web"  # Optional: generate for specific platforms
+    android_package_name: "design.morpheme.dev" # Optional
+    ios_bundle_id: "design.morpheme.dev"        # Optional
+    web_app_id: "YOUR_WEB_APP_ID"               # Optional
+    
+    # New: for CI/CD authentication
+    service_account: "path/to/service-account.json"
+    enable_ci_use_service_account: true
+
   prod:
-    project_id: "morpheme"
-    token: "YOUR FIREBASE TOKEN: firebase login:ci"
-    platform: "android,ios"
-...
+    project_id: "morpheme-prod"
+    # ...
 ```
 
-for token you need to get from [firebase_cli](https://firebase.google.com/docs/cli) you need install that and run `firebase login:ci` to get token.
+### Authentication
+- **Local Development**: The command will use your local `firebase` login credentials if no token or service account is provided.
+- **CI/CD**: You can provide a `token` (generated via `firebase login:ci`) or, more securely, use a `service_account` JSON file.
 
-## Command
+## Usage
+
+Generate configuration for the default flavor (`dev`):
 
 ```bash
-morpheme firebase -f [flavor]
+morpheme firebase
 ```
 
-:::caution
-Ensure you already to install `flutterfire` or you can check with `moprpheme doctor` to see requirement you dont already installed. you can install `flutterfire` with `dart pub global activate flutterfire`.
-:::
+Generate for a specific flavor:
+
+```bash
+morpheme firebase --flavor prod
+```
+
+Force overwrite existing configuration (useful if you've added new platforms):
+
+```bash
+morpheme firebase --overwrite
+```
 
 ## Options
 
 ```bash
-morpheme firebase [arguments]
+morpheme firebase [options]
 ```
 
 To see all available options and flags, run `morpheme firebase --help`.
 
 ### Available Options
 
-- Custom Morpheme Yaml :
+| Option | Abbr | Description | Default |
+|---|---|---|---|
+| `--flavor [flavor]` | `-f` | Select flavor (dev, stag, prod) | `dev` |
+| `--overwrite` | `-o` | Force overwrite firebase configuration | `false` |
+| `--morpheme-yaml [path]` | | Path to a custom configuration file. | `morpheme.yaml` |
 
-| Custom Morpheme Yaml | Description |
-|----------|-------------|
-| `--morpheme-yaml [path_file]` | This command is used to select yaml config the application in a specific file, by default it will run the `morpheme.yaml` file. |
+:::caution
 
-- Flavor/Environment :  
-  
-| Flavor/Environment | Alternative | Description |
-|----------|-------------|-------------|
-| `-f dev` | `--flavor dev` | Run project on dev environment (Default) |
-| `-f stag` | `--flavor stag` | Run project on staging environment|
-| `-f prod` | `--flavor prod` | Run project on production environment |
+Ensure `flutterfire_cli` is installed:
+`dart pub global activate flutterfire_cli`
+
+Run `morpheme doctor` to check your environment.
+
+:::

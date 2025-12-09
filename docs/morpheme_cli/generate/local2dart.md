@@ -4,219 +4,69 @@ sidebar_position: 12
 
 # Local2Dart
 
-This command will generate local database using sqflite from a yaml which is in `local2dart/local2dart.yaml`.
+This command generates a robust SQLite database layer using `sqflite`. It automates the creation of tables, triggers, views, and seed data based on a YAML configuration file. It also generates a type-safe Service class for performing CRUD operations.
 
 ```bash
 morpheme local2dart
 ```
 
-for projects that don't have `local2dart/local2dart.yaml` you can do the command.
+## Setup
+
+If you haven't set up `local2dart` yet, initialize the configuration with:
 
 ```bash
 morpheme local2dart init
 ```
 
-## Sturcture local2dart.yaml
+This generates the default configuration file.
+
+## Directory Structure
+
+```
+.
+├── local2dart/
+│   └── local2dart.yaml      # Your database schema definition
+└── morpheme.yaml
+```
+
+The generated code will be placed in the `core` module:
+
+```
+core/
+└── lib/
+    └── packages/
+        └── local2dart/      # The generated standalone package
+            ├── src/
+            │   ├── model/   # Generated Data Models
+            │   └── service/ # Generated Services (Repositories)
+            └── local2dart.dart
+```
+
+## Configuration (`local2dart.yaml`)
+
+The `local2dart.yaml` file is where you define your entire database schema.
+
+### Global Configuration
 
 ```yaml
-version: 1
-dir_database: "morpheme"
-foreign_key_constrain_support: true
-table:
-  example_category:
-    create_if_not_exists: true
-    column:
-      id:
-        type: "INTEGER"
-        constraint: "PRIMARY KEY"
-        autoincrement: true
-      name:
-        type: "TEXT"
-        nullable: false
-  example:
-    create_if_not_exists: true
-    column:
-      id:
-        type: "INTEGER"
-        constraint: "PRIMARY KEY"
-        autoincrement: true
-      name:
-        type: "TEXT"
-        nullable: false
-      example_category_id:
-        type: "INTEGER"
-        nullable: false
-    foreign:
-      example_category_id:
-        to_table: "example_category"
-        to_column: "id"
-        on_update: "CASCADE"
-        on_delete: "CASCADE"
-
-query:
-  table_name:
-    custom_query_name:
-      disticnt: boolean by default value is false
-      column:
-        example_id:
-          type: "INTEGER"
-          origin: "id"
-        example_name:
-          type: "TEXT"
-          origin: "name"
-        example_total:
-          type: "INT"
-          origin: "SUM(quantity)"
-        example_count:
-          type: "INT"
-          origin: "count(*)"
-      join:
-         - "INNER JOIN example ON example.id = table_name.example_id"
-      where: "create_at BEETWEEN ? AND ?"
-      group_by: "example_id"
-      order_by: ""
-      limit: 10
-      offset: 0
-      having: ""
-
-seed:
-  status:
-    column:
-      - "id"
-      - "name"
-    value:
-      - "1,pending"
-      - "2,onprogress"
-      - "3,done"
-      - "4,cancel"
-
-view:
-  view_name:
-    create_if_not_exists: bool, by default is true
-    disticnt: boolean by default value is false
-    column:
-      example_id:
-        type: "INTEGER"
-        origin: "id"
-      example_name:
-        type: "TEXT"
-        origin: "name"
-      example_total:
-        type: "INT"
-        origin: "SUM(quantity)"
-      example_count:
-        type: "INT"
-        origin: "count(*)"
-    from: table_name
-    join:
-        - "INNER JOIN example ON example.id = table_name.example_id"
-    where: "create_at BEETWEEN ? AND ?"
-    group_by: "example_id"
-    order_by: ""
-    limit: 10
-    offset: 0
-    having: ""
-
-trigger:
-  example:
-    raw_sql: >
-      CREATE TRIGGER [IF NOT EXISTS] trigger_name
-        [BEFORE|AFTER|INSTEAD OF] [INSERT|UPDATE|DELETE]
-        ON table_name
-        [WHEN condition]
-      BEGIN
-        statements;
-      END;
+version: 1                           # Database version (increment this when changing schema)
+dir_database: "morpheme"             # The directory name for the database file
+foreign_key_constrain_support: true  # Enables Foreign Key support (PRAGMA foreign_keys = ON)
 ```
 
-### Version
+-   **version**: Integer. Must be incremented whenever you modify tables or columns to trigger migration.
+-   **dir_database**: String. The folder name where the `.db` file will be stored on the device.
+-   **foreign_key_constrain_support**: Boolean. If `true`, executes `PRAGMA foreign_keys = ON;` on initialization, enforcing referential integrity.
 
-Determine the version of the database if you add and replace existing tables in the database, the version must be added to avoid conflicts.
+### Table Definition
 
-### Dir Database
-
-Directory for open database by default value is morpheme, recommendation to replace from this database by using the project name.
-
-### Foreign Key Constrain Support
-
-SQLite has supported foreign key constraint since version 3.6.19. The SQLite library must also be compiled with neither SQLITE_OMIT_FOREIGN_KEY nor SQLITE_OMIT_TRIGGER.
-
-foreign_key_constrain_support is boolean
-
-if you set foreign_key_constrain_support true then:
-
-```dart
-PRAGMA foreign_keys = ON;
-```
-
-otherwise
-
-```dart
-PRAGMA foreign_keys = OFF;
-```
-
-Learn more about Foreign Key Constrain Support [here](https://www.sqlitetutorial.net/sqlite-foreign-key/)
-
-### Table
-
-For all naming use `snake_case`.
+Tables are defined under the `table` key. Use `snake_case` for all names.
 
 ```yaml
 table:
-  table_name:
-    create_if_not_exists: bool, by default is true
-    column:
-      column_name:
-        type: INTEGER, REAL, TEXT, BLOB, BOOL
-        constraint: PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK (optional)
-        autoincrement: boolean by default value is null (optional)
-        nullable: boolean by default value is true (optional)
-        default: Default value if insert with null (optional)
-    foreign:
-      column_name:
-        to_table: references table
-        to_column: references column
-        on_update: constraint actions values SET NULL, SET DEFAULT, RESTRICT, NO ACTION, CASCADE (optional)
-        on_update: constraint actions values SET NULL, SET DEFAULT, RESTRICT, NO ACTION, CASCADE (optional)
-```
-
-#### Column
-
-To use column_name you can use 2 ways:
-
-1. Directly using the data type
-
-    ```yaml
-    column:
-      id: INTEGER
-      name: TEXT
-      description: TEXT
-    ```
-
-2. More specific
-
-    ```yaml
-    column:
-      id:
-        type: INTEGER
-        constraint: "PRIMARY KEY"
-        autoincrement: true
-      name:
-        type: TEXT
-        nullable: false
-      description: TEXT
-    ```
-
-You can also combine the two methods according to your needs.
-
-#### Foreign
-
-To use this foreign in the column there must be a column_name that will be used as a foreign key.
-
-```yaml
-column:
+  # Table Name
   category:
-    create_if_not_exists: true
+    create_if_not_exists: true    # Adds "IF NOT EXISTS" to create statement
     column:
       id:
         type: "INTEGER"
@@ -225,6 +75,8 @@ column:
       name:
         type: "TEXT"
         nullable: false
+        default: "'General'"      # Default value (note nested quotes for strings)
+  
   todo:
     create_if_not_exists: true
     column:
@@ -232,176 +84,187 @@ column:
         type: "INTEGER"
         constraint: "PRIMARY KEY"
         autoincrement: true
-      name:
-        type: "TEXT"
-        nullable: false
-      category_id:
+      title: "TEXT"               # Shorthand for simple types
+      category_id:                # Foreign key column
         type: "INTEGER"
         nullable: false
+    
+    # Foreign Key Definitions
     foreign:
-      category_id:
-        to_table: "category"
-        to_column: "id"
-        on_update: "CASCADE"
-        on_delete: "CASCADE"
+      category_id:                # Column in this table
+        to_table: "category"      # Parent table
+        to_column: "id"           # Column in parent table
+        on_update: "CASCADE"      # Action on parent update
+        on_delete: "CASCADE"      # Action on parent delete
 ```
 
-### Query
+#### Column Properties
 
-Query is used if you need a custom query other than the one provided by default from generate.
+-   **type**: `INTEGER`, `REAL`, `TEXT`, `BLOB`.
+-   **constraint**: `PRIMARY KEY`, `UNIQUE`, `CHECK`.
+-   **autoincrement**: `true` or `false` (only for `INTEGER PRIMARY KEY`).
+-   **nullable**: `true` (default) or `false` (adds `NOT NULL`).
+-   **default**: The default value for the column.
 
-Without join:
+#### Foreign Key Actions
+
+Available actions for `on_update` and `on_delete`:
+-   `NO ACTION`
+-   `RESTRICT`
+-   `SET NULL`
+-   `SET DEFAULT`
+-   `CASCADE`
+
+### Queries (Custom Joins & Aggregations)
+
+The `query` section generates helper methods for complex custom queries, such as joins or aggregations, that don't map 1:1 to a simple table.
 
 ```yaml
 query:
-  table_name:
-    custom_query_name:
-      disticnt: boolean by default value is false
+  # Base Table Name
+  todo:
+    # Method Name (will generate getTodoSummary())
+    todo_summary:
+      distinct: false
       column:
-        id:
+        todo_id:
           type: "INTEGER"
-          origin: "id"
-        name:
+          origin: "todo.id"           # Source column (Table.Column)
+        todo_title:
           type: "TEXT"
-          origin: "name"
-        total:
-          type: "INT"
-          origin: "SUM(quantity)"
-        count:
-          type: "INT"
-          origin: "count(*)"
-      where: "create_at BEETWEEN ? AND ?"
-      group_by: "example_id"
-      order_by: ""
-      limit: 10
-      offset: 0
-      having: ""
-```
-
-With join:
-
-```yaml
-query:
-  table_name:
-    custom_query_name:
-      disticnt: boolean by default value is false
-      column:
-        id:
-          type: "INTEGER"
-          origin: "table_name.id"
-        example_id:
-          type: "INTEGER"
-          origin: "example.id"
-        name:
+          origin: "todo.title"
+        category_name:
           type: "TEXT"
-          origin: "table_name.name"
-        total:
-          type: "INT"
-          origin: "SUM(table_name.quantity)"
-        count:
-          type: "INT"
-          origin: "count(*)"
+          origin: "category.name"
+        item_count:
+          type: "INTEGER"
+          origin: "count(*)"          # Aggregate function
+      
       join:
-         - "INNER JOIN example ON example.id = table_name.example_id"
-      where: "create_at BEETWEEN ? AND ?"
-      group_by: "example_id"
-      order_by: ""
+         - "INNER JOIN category ON category.id = todo.category_id"
+      
+      where: "todo.created_at BETWEEN ? AND ?"
+      group_by: "category.id"
+      order_by: "todo.id DESC"
       limit: 10
       offset: 0
-      having: ""
 ```
 
-In this case, the difference is if you join with another table, then in `origin` use the `table_name.` prefix to determine which column to know from which table to avoid conflicts with the same column name.
+-   **origin**: Critical for mapping the result of a generic SQL query back to a Dart field.
+-   **where**: Supports `?` placeholders. The generated Dart method will accept arguments matching these placeholders.
 
-### Seed
+### Views
 
-Seed is used if you want to create seed data when the database creation data has been inserted without having to do it manually.
+Views allow you to save a query definition in the database itself.
 
-For example here we have a table called `status` and the status we want already has data when we create the database.
+```yaml
+view:
+  active_todos_view:
+    create_if_not_exists: true
+    distinct: false
+    column:
+      id:
+        type: "INTEGER"
+        origin: "id"
+      title:
+        type: "TEXT"
+        origin: "title"
+    from: todo                        # Source table
+    where: "is_completed = 0"         # Filter condition
+```
+
+### Seeds (Initial Data)
+
+Pre-fill your database with data upon creation.
 
 ```yaml
 seed:
-  status:
+  category:                           # Table to seed
     column:
       - "id"
       - "name"
     value:
-      - "1,pending"
-      - "2,onprogress"
-      - "3,done"
-      - "4,cancel"
+      - "1, 'Work'"
+      - "2, 'Personal'"
+      - "3, 'Shopping'"
 ```
 
-### View
+### Triggers
 
-View is used to create a view of the table, the declaration is almost the same as [Query](#query) except that there is an addition of `from` which is used to determine from which table the data is retrieved.
-
-```yaml
-view:
-  view_name:
-    create_if_not_exists: bool, by default is true
-    disticnt: boolean by default value is false
-    column:
-      example_id:
-        type: "INTEGER"
-        origin: "id"
-      example_name:
-        type: "TEXT"
-        origin: "name"
-      example_total:
-        type: "INT"
-        origin: "SUM(quantity)"
-      example_count:
-        type: "INT"
-        origin: "count(*)"
-    from: table_name
-    join:
-        - "INNER JOIN example ON example.id = table_name.example_id"
-    where: "create_at BEETWEEN ? AND ?"
-    group_by: "example_id"
-    order_by: ""
-    limit: 10
-    offset: 0
-    having: ""
-```
-
-### Trigger
-
-If you want to add a trigger to the database for the trigger here use raw_sql so you are more flexible in defining it.
+Define raw SQL triggers to automate database actions.
 
 ```yaml
 trigger:
-  example:
+  update_todo_timestamp:
     raw_sql: >
-      CREATE TRIGGER [IF NOT EXISTS] trigger_name
-        [BEFORE|AFTER|INSTEAD OF] [INSERT|UPDATE|DELETE]
-        ON table_name
-        [WHEN condition]
+      CREATE TRIGGER IF NOT EXISTS update_todo_timestamp
+      AFTER UPDATE ON todo
       BEGIN
-        statements;
+        UPDATE todo SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
       END;
 ```
 
-Learn more about Trigger [here](https://www.sqlitetutorial.net/sqlite-trigger/)
+## Generated API
 
-## Result Generate
+The generated package (`core/lib/packages/local2dart`) provides a generic service named `DatabaseService` and specific services for each table (e.g., `TodoService`).
 
-The result of generating local2dart will be a new module inside `core/packages/local2dart`, don't forget to add `export 'package:local2dart/local2dart.dart';` in `core/lib/core.dart`.
+### Standard CRUD Operations
 
-### Available Method in Service
+Each table service includes these methods:
 
-- count
-- get
-- getWithPagination
-- getById
-- insert
-- bulkInsert
-- upsert
-- update
-- bulkUpdate
-- updateById
-- bulkUpdateById
-- delete
-- bulkDelete
-- deleteById
-- bulkDeleteById
+| Method | Description |
+|---|---|
+| `count()` | Returns the number of rows in the table. |
+| `get()` | Retrieves all rows as a list of Models. |
+| `getWithPagination({limit, offset})` | Retrieves rows with pagination limits. |
+| `getById(id)` | Retrieves a single row by its Primary Key. |
+| `insert(data)` | Inserts a new row. Returns the new ID. |
+| `bulkInsert(list)` | Inserts multiple rows in a batch transaction. |
+| `upsert(data)` | Inserts or Updates if the key exists. |
+| `update(data)` | Updates a row matching the data's Primary Key. |
+| `updateById(id, data)` | Updates a row by a specific ID. |
+| `bulkUpdate(list)` | Updates multiple rows in a batch. |
+| `delete(data)` | Deletes a row matching the data's Primary Key. |
+| `deleteById(id)` | Deletes a row by its specific ID. |
+| `bulkDeleteById(ids)` | Deletes multiple rows by their IDs. |
+
+### Usage
+
+1.  **Export the Library**:
+    Add this to your `core/lib/core.dart`:
+    ```dart
+    export 'package:local2dart/local2dart.dart';
+    ```
+
+2.  **Use in Code**:
+    ```dart
+    // Initialize (usually in main.dart or dependency injection)
+    await DatabaseHelper.initialize();
+
+    // Use a Service
+    final service = TodoService();
+    
+    // Create
+    final id = await service.insert(TodoBody(
+      title: 'Buy Milk', 
+      categoryId: 1
+    ));
+    
+    // Read
+    final todo = await service.getById(id);
+    print(todo?.title);
+    ```
+
+## Options
+
+```bash
+morpheme local2dart [options]
+```
+
+To see all available options and flags, run `morpheme local2dart --help`.
+
+### Available Options
+
+| Option | Abbr | Description |
+|---|---|---|
+| `--morpheme-yaml [path]` | | Path to a custom configuration file (default: `morpheme.yaml`). |

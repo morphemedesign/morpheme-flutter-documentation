@@ -1,45 +1,54 @@
 ---
 sidebar_position: 2
 ---
-
 # Feature
 
-This command is used to generate new feature
+
+This command generates a new feature module, which is an independent package where you can build your application features. It handles the creation of the module structure and automatically registers it with the main application.
 
 ```bash
 morpheme feature [feature_name]
 ```
 
-## Example
+## Generated Structure
 
-For the example we will generate a new feature named master
+The command creates the following structure for a feature named `profile`:
+- `features/profile/`
+  - `pubspec.yaml`: Defines the feature's dependencies.
+  - `analysis_options.yaml`: Linting rules.
+  - `lib/locator.dart`: Dependency injection setup for the feature.
+  - `test/`: Test directory.
 
-```bash
-morpheme feature master
-```
-
-The feature master folder will be created automatically, we can check in `features/master/`
-
-![File generated](../../../static/img/generate/feature/master_feature.png)
-
-:::caution
-
-The feature will not be generated if the feature name we enter already exists.
-
-:::
+It also automatically:
+- Updates the main `pubspec.yaml` to include the new feature.
+- Registers the feature in the main `locator.dart`.
 
 ## Options
 
 ```bash
-morpheme feature [feature_name] [arguments]
+morpheme feature [feature_name] [options]
 ```
 
 To see all available options and flags, run `morpheme feature --help`.
 
 ### Available Options
 
-- Specific Apps Name :  
-  
-| Apps Name | Alternative | Description |
-|----------|-------------|-------------|
-| `-a [apps-name]` | `--apps-name [apps-name]` | Create a new feature module in apps. |
+| Option | Abbr | Description | Default |
+|---|---|---|---|
+| `--apps-name [name]` | `-a` | Create the feature module within a specific app (e.g., inside `apps/my_app/features/`). | |
+
+## Examples
+
+**Standard Feature:**
+Generate a `master` feature in the root `features/` directory.
+
+```bash
+morpheme feature master
+```
+
+**Feature inside an App:**
+Generate a `dashboard` feature specifically for the `driver` app.
+
+```bash
+morpheme feature dashboard --apps-name driver
+```

@@ -1,10 +1,10 @@
 ---
-sidebar_position: 7
+sidebar_position: 8
 ---
-
 # Color2Dart
 
-This command is used to generate our theme and dart file from yaml to dart.
+
+This command generates Dart color classes and theme data from YAML configuration files. It streamlines the management of application themes, supporting light/dark modes, custom color palettes, and flavor-specific configurations.
 
 ```bash
 morpheme color2dart
@@ -12,13 +12,13 @@ morpheme color2dart
 
 ## Setup
 
-first if you dont have a color2dart.yaml in `color2dart/color2dart.yaml` in your project you need to run
+First, if you don't have a `color2dart.yaml` in your project (`color2dart/color2dart.yaml`), you need to initialize it:
 
 ```bash
 morpheme color2dart init
 ```
 
-File generated in `color2dart/color2dart.yaml`
+This creates a default configuration file in `color2dart/color2dart.yaml`:
 
 ```yaml title="color2dart/color2dart.yaml"
 # brightness can be 'light' or 'dark'
@@ -29,45 +29,22 @@ light:
     white: "#FFFFFF"
     black: "#1E1E1E"
     grey: "#979797"
-    grey1: "#CFCFCF"
-    grey2: "#E5E5E5"
-    grey3: "#F5F5F5"
-    grey4: "#F9F9F9"
     primary: "#28A0F6"
     secondary: "#FDA06C"
-    primaryLighter: "#00AFC1"
-    warning: "#DAB320"
-    info: "#00AFC1"
-    success: "#22A82F"
-    error: "#D66767"
-    bgError: "#FFECEA"
-    bgInfo: "#DFFCFF"
-    bgSuccess: "#ECFFEE"
-    bgWarning: "#FFF9E3"
+    # ... other colors
 dark:
   brightness: dark
   colors:
     white: "#1E1E1E"
     black: "#FFFFFF"
     grey: "#979797"
-    grey1: "#F9F9F9"
-    grey2: "#F5F5F5"
-    grey3: "#E5E5E5"
-    grey4: "#CFCFCF"
     primary: "#28A0F6"
     secondary: "#FDA06C"
-    primaryLighter: "#00AFC1"
-    warning: "#DAB320"
-    info: "#00AFC1"
-    success: "#22A82F"
-    error: "#D66767"
-    bgError: "#FFECEA"
-    bgInfo: "#DFFCFF"
-    bgSuccess: "#ECFFEE"
-    bgWarning: "#FFF9E3"
+    # ... other colors
 ```
 
-you can use `MaterialColor` to use `Color` in yaml
+### Material Colors
+You can also define `MaterialColor` swatches directly in the YAML:
 
 ```yaml
 light:
@@ -88,33 +65,50 @@ light:
           900: "#0D47A1"
 ```
 
-File generated now in `core/lib/src/themes`
+## Global Configuration
+
+You can customize the directory structure in `morpheme.yaml`. If not specified, the command uses the defaults shown below.
+
+```yaml title="morpheme.yaml"
+color2dart:
+  color2dart_dir: "color2dart"  # Directory containing color definitions (color2dart.yaml)
+  output_dir: "lib/themes"      # Output directory for generated theme files
+```
+
+## Generated Files
+
+The command generates theme and color classes in `core/lib/src/themes`:
 
 ![File generated](../../../static/img/generate/color2dart/color2dart.png)
 
 ## Usage
 
-To usage this theme and color you need to setup in your `MaterialApp`
+### 1. Generate Files
+Run the generation command:
+
+```bash
+morpheme color2dart
+```
+
+### 2. Integration
+Integrate the generated themes into your `MaterialApp`. The `Morpheme Flutter Starter Kit` typically handles this via `GlobalCubit`.
 
 ```dart
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final router = locator<GoRouter>();
-
+    // ... setup
     return BlocProvider(
       create: (context) => GlobalCubit(),
       child: Builder(builder: (context) {
         return MaterialApp.router(
           title: 'Morpheme',
-          scaffoldMessengerKey: scaffoldMessengerKey,
-          theme: context.selectedTheme.themeData, // this, context.selectedTheme.themeData take from GlobalCubit
-          darkTheme: context.selectedTheme.themeData, // this, context.selectedTheme.themeData take from GlobalCubit
-          locale: context.selectedLocale,
-          localizationsDelegates: S.localizationsDelegates,
-          supportedLocales: S.supportedLocales,
-          routerConfig: router,
+          // Access selected theme from GlobalCubit extension
+          theme: context.selectedTheme.themeData,
+          darkTheme: context.selectedTheme.themeData,
+          // ...
         );
       }),
     );
@@ -122,6 +116,61 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-You can change theme just like this `context.changeTheme(MorphemeThemeDark())` or theme you set in your color2dart.
+### 3. Accessing Colors
+Access colors dynamically based on the current theme using the `BuildContext` extension:
 
-Now to use color you need to use like this `context.color.primary` it take from `read<GlobalCubit>().state.theme.color`.
+```dart
+Container(
+  color: context.color.primary,
+  child: Text(
+    'Hello World',
+    style: TextStyle(color: context.color.onPrimary),
+  ),
+)
+```
+
+### 4. Changing Themes
+Switch themes using the `GlobalCubit` extension methods:
+
+```dart
+context.changeTheme(MorphemeThemeDark());
+```
+
+## Options
+
+```bash
+morpheme color2dart [options]
+```
+
+To see all available options and flags, run `morpheme color2dart --help`.
+
+### Available Options
+
+| Option | Abbr | Description | Default |
+|---|---|---|---|
+| `--flavor [flavor]` | | Generate colors for a specific flavor (e.g., dev, stag, prod). | |
+| `--all-flavor` | `-a` | Generate colors for all flavors at once. | `false` |
+| `--clear-files` | `-c` | Clear existing generated files before generating new ones. | `false` |
+| `--morpheme-yaml [path]` | | Path to a custom configuration file. | `morpheme.yaml` |
+
+## Examples
+
+**Initialize Configuration:**
+```bash
+morpheme color2dart init
+```
+
+**Generate for current flavor:**
+```bash
+morpheme color2dart
+```
+
+**Generate for all flavors:**
+```bash
+morpheme color2dart --all-flavor
+```
+
+**Clean and Generate:**
+```bash
+morpheme color2dart --clear-files
+```

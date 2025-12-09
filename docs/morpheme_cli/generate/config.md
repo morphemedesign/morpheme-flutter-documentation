@@ -1,40 +1,58 @@
 ---
 sidebar_position: 1
 ---
-
 # Config
 
-:::caution
 
-This command is specific to VSCode IDE user.
-:::
+This command generates IDE run configurations for **VS Code** and **Android Studio** based on the `morpheme.yaml` configuration. It sets up launch configurations for all defined flavors (Debug, Profile, Release) and integrates pre-launch tasks.
 
 ```bash
 morpheme config
 ```
 
-This command is used to generate the `.vscode/launch.json` and `.vscode/task.json` files according to the configuration in the `morpheme.yaml` file.
+## Supported IDEs
+
+### VS Code
+Generates:
+- `.vscode/launch.json`: Launch configurations for each flavor and mode.
+- `.vscode/tasks.json`: Build tasks and pre-launch scripts (e.g., `morpheme firebase`).
+
+### Android Studio
+Generates:
+- `.idea/runConfigurations/*.xml`: Individual run configuration files for each flavor and mode.
+- Includes pre-launch tasks to handle flavor-specific setup automatically.
+
+## Generated Configuration
+For each flavor defined in `morpheme.yaml`, the command creates 3 configurations:
+- **Debug**: standard `flutter run --debug`
+- **Profile**: `flutter run --profile`
+- **Release**: `flutter run --release`
 
 ![File generated](../../../static/img/generate/config/file_generated.png)
 
 ## Options
 
 ```bash
-morpheme config [arguments]
+morpheme config [options]
 ```
 
 To see all available options and flags, run `morpheme config --help`.
 
 ### Available Options
 
-- Custom Morpheme Yaml :
+| Option | Abbr | Description | Default |
+|---|---|---|---|
+| `--target [path]` | `-t` | Path to the main entry point file. | `lib/main.dart` |
+| `--morpheme-yaml [path]` | | Path to a custom configuration file. | `morpheme.yaml` |
 
-| Custom Morpheme Yaml | Description |
-|----------|-------------|
-| `--morpheme-yaml [path_file]` | This command is used to select yaml config the application in a specific file, by default it will run the `morpheme.yaml` file. |
+## Examples
 
-- Custom Target :
-  
-| Custom Target | Alternative | Description |
-|----------|-------------|-------------|
-| `-t [path_file]` | `--target [path_file]` | This command is used to run the application in a specific file, by default it will run the `lib/main.dart` file. |
+**Standard Config:**
+```bash
+morpheme config
+```
+
+**Custom Entry Point:**
+```bash
+morpheme config -t lib/main_dev.dart
+```
